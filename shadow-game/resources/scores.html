@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <title>Notice</title>
+</head>
+<body>
+    <!-- Styling -->
+    <style>
+        div {
+            color: #FA0;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+        }
+    </style>
+
+    <div class="scoreboard" style="text-align: right;" onclick="parent.postMessage({ action: 'score-alert' }, '*')">
+    </div>
+
+    <!-- Code -->
+    <script>
+
+        // Called when a message is received from the plugin
+        window.addEventListener('message', e => {
+            switch (e.data.action) {
+                case 'generate-table':
+                    generateTable(e.data.scores);
+                    break;
+            }
+        });
+
+        // On load, ask the plugin to send us all messages
+        parent.postMessage({ action: 'panel-load' }, '*');
+
+        const generateTable = (users) => {
+
+            const appendUser = (user, row) => {
+                const cell = document.createElement("td");
+                const cellText = document.createTextNode(user);
+                cell.appendChild(cellText);
+                row.appendChild(cell);
+            };
+
+            const scoreDiv = document.querySelector("div.scoreboard");
+
+            while (scoreDiv.firstChild) {
+                scoreDiv.removeChild(scoreDiv.firstChild) // Remove all children from scoreboard div (if any)
+            }
+
+            // creates a <table> element and a <tbody> element
+            const tbl = document.createElement("table");
+            const tblBody = document.createElement("tbody");
+
+            // creating all cells
+            for (const user of Object.values(users).sort(s => s.score).reverse()) {
+                // creates a table row
+                const row = document.createElement("tr");
+
+                appendUser(user.userDisplayName + ': ', row);
+                appendUser(user.score, row);
+
+                // add the row to the end of the table body
+                tblBody.appendChild(row);
+            }
+
+            // put the <tbody> in the <table>
+            tbl.appendChild(tblBody);
+            // appends <table> into <body>
+            scoreDiv.appendChild(tbl);
+        }
+    </script>
+</body>
+</html>

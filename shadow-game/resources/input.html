@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>Input</title>
+</head>
+<body>
+    <style>
+        div {
+            color: #FA0;
+            font-family: 'Press Start 2P', cursive;
+        }
+    </style>
+    <div>
+        <label for="messageText"></label>
+        <input disabled style="margin-top: 1em;" type="text" id="messageText" />
+        <button disabled id="sendMessage">Answer</button>
+    </div>
+    <script>
+        const button = document.querySelector("#sendMessage");
+        button.addEventListener("click", () => {
+            const message = document.querySelector("#messageText").value;
+            window.parent.postMessage({action: 'answer', answer: message}, "*");
+        });
+
+        window.addEventListener('message', function (e) {
+            const enableControls = enable => {
+                if (enable) {
+                    document.querySelector("#messageText").value = '';
+                }
+                document.querySelector("#messageText").disabled = !enable;
+                document.querySelector("#sendMessage").disabled = !enable;
+            };
+
+            switch (e.data.action) {
+                case 'start-round':
+                    enableControls(true);
+                    break;
+                case 'stop-round':
+                    enableControls(false);
+                    break;
+            }
+        })
+    </script>
+</body>
+</html>
