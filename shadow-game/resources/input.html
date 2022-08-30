@@ -21,15 +21,13 @@
     <script>
         const button = document.querySelector("#sendMessage");
         button.addEventListener("click", () => {
-            const message = document.querySelector("#messageText").value;
-            window.parent.postMessage({action: 'answer', answer: message}, "*");
+            const answer = document.querySelector("#messageText").value;
+            window.parent.postMessage({action: 'msg-answer', answer}, "*");
         });
 
         window.addEventListener('message', function (e) {
             const enableControls = enable => {
-                if (enable) {
-                    document.querySelector("#messageText").value = '';
-                }
+                document.querySelector("#messageText").value = '';
                 document.querySelector("#messageText").disabled = !enable;
                 document.querySelector("#sendMessage").disabled = !enable;
             };

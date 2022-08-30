@@ -1,4 +1,4 @@
-import {settingsDev} from "./settings";
+import {settingsLocal} from "./settings";
 
 /**
  * This is the main entry point for your plugin.
@@ -11,7 +11,7 @@ import {settingsDev} from "./settings";
  */
 const levenshtein = require('js-levenshtein');
 
-const settings = /*process.env.VATOM_ENV !== 'dev' ? settingsProd :*/ settingsDev;
+const settings = settingsLocal;
 
 export default class MyPlugin extends BasePlugin {
 
@@ -83,7 +83,12 @@ export default class MyPlugin extends BasePlugin {
                 score: score.score
             }
         }
-        await this.registerScoresOverlay();
+
+        const userId = await this.user.getID();
+        if(this.scores[userId]) {
+            await this.registerScoresOverlay();
+            await this.registerInputOverlay();
+        }
     }
 
     async registerScoresOverlay() {
@@ -107,25 +112,52 @@ export default class MyPlugin extends BasePlugin {
         this.scoreOverlayId = undefined;
     }
 
+    async registerInputOverlay() {
+        if (this.inputOverlay) {
+            return;
+        }
+        this.inputOverlay = await this.menus.register({
+            section: 'overlay-top',
+            panel: {
+                iframeURL: this.paths.absolute('input.html'),
+                width: 300,
+                height: 100
+            }
+        });
+    }
+
+    async unregisterInputOverlay() {
+        if (this.inputOverlay) {
+            await this.menus.unregister(this.inputOverlay)
+        }
+        this.inputOverlay = undefined;
+    }
+
     async onMessage(data) {
         console.log(`onMessage plugin received: ${JSON.stringify(data)}`);
         switch (data.action) {
-            case 'panel-load':
+            case 'msg-panel-load':
                 await this.menus.postMessage({action: 'generate-table', scores: this.scores});
                 break;
-            case 'score-alert':
+            case 'msg-score-alert':
                 this.menus.alert(null, 'Find the character of the shade to increase your score!');
                 break;
-            case 'answer':
+            case 'msg-answer':
                 await this.addAnswer({answer: data.answer});
+                break;
+            case 'msg-game-master-answer':
+                this.answers[data.userId] = data.answer.answer;
                 break;
             case 'msg-new-user':
                 this.scores[data.newUser.userId] = {
                     userId: data.newUser.userId,
                     userDisplayName: data.newUser.userDisplayName,
-                    score: 0
+                    score: data.newUser.score
                 };
-                console.log(`Scores add: ${JSON.stringify(this.scores)}`);
+                this.menus.postMessage({action: 'generate-table', scores: this.scores});
+                break;
+            case 'msg-new-scores':
+                this.scores = data.score;
                 this.menus.postMessage({action: 'generate-table', scores: this.scores});
                 break;
             case 'msg-remove-user':
@@ -134,13 +166,22 @@ export default class MyPlugin extends BasePlugin {
                 break;
             case 'msg-start-game':
                 this.gameId = data.gameId;
+                this.gameMasterId = data.gameMasterId;
+                break;
+            case 'msg-start-round':
+                await this.menus.postMessage({action: 'start-round'});
+                break;
+            case 'msg-stop-round':
+                this.scores = data.scores;
+                this.menus.postMessage({action: 'generate-table', scores: this.scores});
+                await this.menus.postMessage({action: 'stop-round'});
                 break;
         }
     }
 
-    async addAnswer(data) {
-        const userDisplayName = await this.user.getDisplayName();
-        this.answers[userDisplayName] = data.answer;
+    async addAnswer(answer) {
+        const userId = await this.user.getID();
+        await this.messages.send({action: 'msg-game-master-answer', userId, answer}, false, this.gameMasterId);
     }
 }
 
@@ -153,10 +194,10 @@ class ShadeGameComponent extends BaseComponent {
                 await this.startGame();
                 break;
             case 'action-start-round':
-                this.startRound();
+                await this.startRound();
                 break;
             case 'action-stop-round':
-                this.stopRound();
+                await this.stopRound();
                 break;
             case 'action-remove-all':
                 await this.removeAllImages();
@@ -180,34 +221,59 @@ class ShadeGameComponent extends BaseComponent {
         })
             .then(r => r.json()
                 .then(json => this.plugin.gameId = json.id));
-        this.plugin.messages.send({action: 'msg-start-game', gameId: this.plugin.gameId}, true);
+        const gameMasterId = await this.plugin.user.getID();
+        await fetch(`${settings.host}/${this.plugin.gameId}/add-user-to-game`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                externalId: gameMasterId,
+                displayName: await this.plugin.user.getDisplayName(),
+                role: 1
+            })
+        });
+        this.plugin.messages.send({action: 'msg-start-game', gameId: this.plugin.gameId, gameMasterId}, true);
     }
 
-    startRound() {
-        this.plugin.menus.postMessage({action: 'msg-start-round'})
+    async startRound() {
+        await this.plugin.messages.send({action: 'msg-start-round'}, true)
     }
 
-    stopRound() {
-        this.updateScores();
-        this.plugin.menus.postMessage({action: 'mag-stop-round', })
+    async stopRound() {
+        await this.updateScores();
+        await this.plugin.messages.send({action: 'msg-stop-round', scores: this.plugin.scores}, true)
     }
 
-    updateScores() {
+    async updateScores() {
         const correctAnswer = this.getField('correct-answer');
         const answers = Object.entries(this.plugin.answers);
+        console.log(`Correct Answer: ${correctAnswer}. Answers: ${JSON.stringify(answers)}`);
 
         const unifyString = str => str ? str.toLowerCase().replace(/[ -_]/g, '') : undefined;
 
         const areEqual = (str1, str2) => str1 && str2 ? levenshtein(unifyString(str1), unifyString(str2)) <= 1 : false;
 
+        const correctUsers = [];
         for (const answer of answers) {
             if (areEqual(answer[1], correctAnswer)) {
-                const user = answer[0];
-                this.plugin.scores[user] = this.plugin.scores[user] === undefined ? 0 : this.plugin.scores[user] + 1;
-                delete this.plugin.answers[user];
+                const userId = answer[0];
+                correctUsers.push(userId);
+                this.plugin.scores[userId].score = this.plugin.scores[userId] === undefined ? 0 : this.plugin.scores[userId].score + 1;
             }
         }
-        this.plugin.menus.postMessage({ action: 'generate-table', scores: this.plugin.scores })
+        this.plugin.answers = {};
+        await fetch(`${settings.host}/${this.plugin.gameId}/increase-scores`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                users: correctUsers
+            })
+        });
+
+        this.plugin.menus.postMessage({action: 'msg-new-scores', scores: this.plugin.scores}, true)
     }
 
     async removeAllImages() {
@@ -225,27 +291,35 @@ class RegisterComponent extends BaseComponent {
 
     async onClick() {
         await this.plugin.registerScoresOverlay();
+        await this.plugin.registerInputOverlay();
         if (!this.plugin.gameId) {
             return;
         }
 
         const userId = await this.plugin.user.getID();
-        if (this.plugin.scores[userId]) {
-            return;
+        if (!this.plugin.scores[userId]) {
+            const userDisplayName = await this.plugin.user.getDisplayName();
+            const newUser = await fetch(`${settings.host}/${this.plugin.gameId}/add-user-to-game`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    externalId: userId,
+                    displayName: userDisplayName,
+                    role: 2,
+                    status: 1
+                })
+            }).then(r => r.json());
+            await this.plugin.messages.send({
+                action: 'msg-new-user',
+                newUser: {userId, userDisplayName, score: newUser.score}
+            }, true);
         }
-        const userDisplayName = await this.plugin.user.getDisplayName();
-        const sendMessageP = this.plugin.messages.send({action: 'msg-new-user', newUser: {userId, userDisplayName}}, true);
-        await fetch(`${settings.host}/${this.plugin.gameId}/add-user-to-game`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                externalId: userId,
-                displayName: userDisplayName
-            })
-        });
-        await sendMessageP;
+        if (!this.plugin.gameMasterId) {
+            await fetch(`${settings.host}/${this.plugin.gameId}/game-master`).then(r => r.json())
+                .then(json => this.plugin.gameMasterId = json.gameMasterId);
+        }
     }
 }
 
@@ -257,12 +331,8 @@ class OptOutComponent extends BaseComponent {
             return;
         }
 
-        if (this.plugin.gamePanelId) {
-            this.plugin.menus.unregister(this.plugin.gamePanelId);
-        }
-        this.plugin.gamePanelId = undefined;
-
         await this.plugin.unregisterScoresOverlay();
+        await this.plugin.unregisterInputOverlay();
 
         const userId = await this.plugin.user.getID();
         if (!this.plugin.scores[userId]) {
@@ -270,7 +340,16 @@ class OptOutComponent extends BaseComponent {
             return;
         }
         const sendMessageP = this.plugin.messages.send({action: 'msg-remove-user', userId}, true);
-        await fetch(`${settings.host}/${this.plugin.gameId}/${userId}/`, {method: 'DELETE'});
+        await fetch(`${settings.host}/${this.plugin.gameId}/add-user-to-game`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                externalId: userId,
+                status: 2
+            })
+        });
         await sendMessageP;
     }
 }

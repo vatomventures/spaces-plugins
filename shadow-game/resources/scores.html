@@ -16,7 +16,7 @@
         }
     </style>
 
-    <div class="scoreboard" style="text-align: right;" onclick="parent.postMessage({ action: 'score-alert' }, '*')">
+    <div class="scoreboard" style="text-align: right;" onclick="parent.postMessage({ action: 'msg-score-alert' }, '*')">
     </div>
 
     <!-- Code -->
@@ -32,7 +32,7 @@
         });
 
         // On load, ask the plugin to send us all messages
-        parent.postMessage({ action: 'panel-load' }, '*');
+        parent.postMessage({ action: 'msg-panel-load' }, '*');
 
         const generateTable = (users) => {
 
