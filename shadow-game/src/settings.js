@@ -9,3 +9,5 @@ export const settingsDev = {
 export const settingsLocal = {
     host: 'http://localhost:3000/local'
 };
+
+export const getSettings = () => settingsLocal;
