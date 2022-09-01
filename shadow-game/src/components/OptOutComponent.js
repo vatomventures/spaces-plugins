@@ -28,7 +28,8 @@ export class OptOutComponent extends BaseComponent {
                 externalId: userId,
                 status: 2
             })
-        });
+        })
+
         await sendMessageP;
     }
 }

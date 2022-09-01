@@ -19,6 +19,9 @@ export class ShadeGameComponent extends BaseComponent {
             case 'action-stop-round':
                 await this.stopRound();
                 break;
+            case 'action-end-game':
+                await this.endGame();
+                break;
             case 'action-remove-all':
                 await this.removeAllImages();
                 break;
@@ -26,7 +29,6 @@ export class ShadeGameComponent extends BaseComponent {
     }
 
     async startGame() {
-        await this.plugin.registerScoresOverlay();
         if (this.plugin.gameId) {
             this.plugin.menus.alert(null, 'There is already an active game');
             return;
@@ -50,10 +52,27 @@ export class ShadeGameComponent extends BaseComponent {
             body: JSON.stringify({
                 externalId: gameMasterId,
                 displayName: await this.plugin.user.getDisplayName(),
-                role: 1
+                role: [1]
             })
         });
         this.plugin.messages.send({action: 'msg-start-game', gameId: this.plugin.gameId, gameMasterId}, true);
+    }
+
+    async endGame() {
+        if (!this.plugin.gameId) {
+            return;
+        }
+        const endGameP = fetch(`${settings.host}/${this.plugin.gameId}/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                gameStatus: 2
+            })
+        });
+        await this.plugin.messages.send({action: 'msg-end-game'}, true)
+        await endGameP;
     }
 
     async startRound() {

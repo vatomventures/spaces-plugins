@@ -24,6 +24,7 @@ export default class ShadeGamePlugin extends BasePlugin {
     scores = {};
     answers = {};
     gameId;
+    gameMasterId;
 
     /** Called on load */
     async onLoad() {
@@ -49,6 +50,7 @@ export default class ShadeGamePlugin extends BasePlugin {
                 {id: 'action-start-game', name: 'Start game', type: 'button'},
                 {id: 'action-start-round', name: 'Start round', type: 'button'},
                 {id: 'action-stop-round', name: 'Stop round', type: 'button'},
+                {id: 'action-end-game', name: 'End game', type: 'button'},
                 {id: 'action-remove-all', name: 'Remove All Images', type: 'button'},
             ]
         });
@@ -174,6 +176,8 @@ export default class ShadeGamePlugin extends BasePlugin {
             case 'msg-start-game':
                 this.gameId = data.gameId;
                 this.gameMasterId = data.gameMasterId;
+                await this.registerScoresOverlay();
+                this.menus.postMessage({action: 'generate-table', scores: this.scores});
                 break;
             case 'msg-start-round':
                 await this.menus.postMessage({action: 'start-round'});
@@ -183,7 +187,32 @@ export default class ShadeGamePlugin extends BasePlugin {
                 this.menus.postMessage({action: 'generate-table', scores: this.scores});
                 await this.menus.postMessage({action: 'stop-round'});
                 break;
+            case 'msg-end-game':
+                await this.endGame();
+                break;
         }
+    }
+
+    async endGame() {
+        const changeUserStatusRequests = Object.values(this.scores)
+            .map(score => fetch(`${settings.host}/${this.gameId}/add-user-to-game`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    externalId: score.userId,
+                    status: 2
+                })
+            }));
+        await Promise.all(changeUserStatusRequests);
+        this.scores = {};
+        this.answers = {};
+        this.gameMasterId = undefined;
+        this.gameId = undefined;
+        this.menus.postMessage({action: 'generate-table', scores: this.scores});
+        await this.unregisterInputOverlay();
+        await this.unregisterScoresOverlay()
     }
 
     async addAnswer(answer) {

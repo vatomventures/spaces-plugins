@@ -5,11 +5,13 @@ const settings = getSettings();
 export class RegisterComponent extends BaseComponent {
 
     async onClick() {
-        await this.plugin.registerScoresOverlay();
-        await this.plugin.registerInputOverlay();
         if (!this.plugin.gameId) {
+            console.log('There is no active game to register to');
             return;
         }
+
+        await this.plugin.registerScoresOverlay();
+        await this.plugin.registerInputOverlay();
 
         const userId = await this.plugin.user.getID();
         if (!this.plugin.scores[userId]) {
