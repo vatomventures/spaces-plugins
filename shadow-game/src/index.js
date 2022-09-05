@@ -25,6 +25,7 @@ export default class ShadeGamePlugin extends BasePlugin {
     answers = {};
     gameId;
     gameMasterId;
+    pictureId = settings.pictureId;
 
     /** Called on load */
     async onLoad() {
@@ -71,6 +72,8 @@ export default class ShadeGamePlugin extends BasePlugin {
     }
 
     async initialLoad() {
+        await this.objects.update(this.pictureId, {url: this.paths.absolute('gameToStart.png')}, false);
+
         const instanceId = await this.world.getInstanceID();
         this.gameId = await fetch(`${settings.host}/game-of-room?instanceId=${instanceId}`, {method: 'GET',})
             .then(res => res.json()

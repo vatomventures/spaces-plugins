@@ -1,7 +1,6 @@
 import {getSettings} from "../settings";
 
 const levenshtein = require("js-levenshtein");
-const ShadeGamePlugin = require("../index");
 
 const settings = getSettings();
 
@@ -71,15 +70,22 @@ export class ShadeGameComponent extends BaseComponent {
                 gameStatus: 2
             })
         });
+        await this.plugin.objects.update(this.plugin.pictureId, {url: this.plugin.paths.absolute('gameToStart.png')});
         await this.plugin.messages.send({action: 'msg-end-game'}, true)
         await endGameP;
     }
 
     async startRound() {
+        if (!this.plugin.gameId) {
+            return;
+        }
         await this.plugin.messages.send({action: 'msg-start-round'}, true)
+        await this.plugin.objects.update(this.plugin.pictureId, {url: this.getField('picture')});
     }
-
     async stopRound() {
+        if (!this.plugin.gameId) {
+            return;
+        }
         await this.updateScores();
         await this.plugin.messages.send({action: 'msg-stop-round', scores: this.plugin.scores}, true)
     }
@@ -118,7 +124,7 @@ export class ShadeGameComponent extends BaseComponent {
     async removeAllImages() {
 
         const nearbyObjects = await this.plugin.objects.fetchInRadius(this.fields.x || 0, this.fields.y || 0, 500);
-        const nearbyImages = nearbyObjects.filter(obj => obj.id.includes(`object:${ShadeGamePlugin.id}`));
+        const nearbyImages = nearbyObjects.filter(obj => obj.id.includes(`object:shadegameplugin`));
 
         // Remove all
         await Promise.all(nearbyImages.map(c => this.plugin.objects.remove(c.id)))

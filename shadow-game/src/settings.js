@@ -7,7 +7,8 @@ export const settingsDev = {
 };
 
 export const settingsLocal = {
-    host: 'http://localhost:3000/local'
+    host: 'http://localhost:3000/local',
+    pictureId: 'object:shadegameplugin:qtexk4nriho'
 };
 
 export const getSettings = () => settingsLocal;
