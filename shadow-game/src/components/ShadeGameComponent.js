@@ -1,10 +1,14 @@
 import {getSettings} from "../settings";
+import {MAX_ROUNDS} from "../index";
 
 const levenshtein = require("js-levenshtein");
 
 const settings = getSettings();
 
 export class ShadeGameComponent extends BaseComponent {
+
+    currentRound = 0;
+    numberOfRounds = 0;
 
     async onAction(action) {
         console.log(`onAction ShadeGameComponent received: ${JSON.stringify(action)}`);
@@ -54,6 +58,12 @@ export class ShadeGameComponent extends BaseComponent {
                 role: [1]
             })
         });
+        for (let i = 1; i <= MAX_ROUNDS; i++) {
+            if(!(await this.getField(`picture${i}`))) {
+                break;
+            }
+            this.numberOfRounds++;
+        }
         this.plugin.messages.send({action: 'msg-start-game', gameId: this.plugin.gameId, gameMasterId}, true);
     }
 
@@ -71,17 +81,26 @@ export class ShadeGameComponent extends BaseComponent {
             })
         });
         await this.plugin.objects.update(this.plugin.pictureId, {url: this.plugin.paths.absolute('gameToStart.png')});
-        await this.plugin.messages.send({action: 'msg-end-game'}, true)
+        await this.plugin.messages.send({action: 'msg-end-game'}, true);
         await endGameP;
+        this.numberOfRounds = 0;
+        this.currentRound = 0;
     }
 
     async startRound() {
         if (!this.plugin.gameId) {
             return;
         }
-        await this.plugin.messages.send({action: 'msg-start-round'}, true)
-        await this.plugin.objects.update(this.plugin.pictureId, {url: this.getField('picture')});
+        if (this.currentRound === this.numberOfRounds) {
+            this.plugin.menus.alert(null, 'There are no more rounds');
+            return;
+        }
+        this.currentRound++;
+        await this.plugin.messages.send({action: 'msg-start-round'}, true);
+        const url = await this.paths.absolute(await this.getField(`picture${this.currentRound}`));
+        await this.plugin.objects.update(this.plugin.pictureId, {url});
     }
+
     async stopRound() {
         if (!this.plugin.gameId) {
             return;
@@ -91,9 +110,8 @@ export class ShadeGameComponent extends BaseComponent {
     }
 
     async updateScores() {
-        const correctAnswer = this.getField('correct-answer');
+        const correctAnswer = this.getField(`correct-answer${this.currentRound}`);
         const answers = Object.entries(this.plugin.answers);
-        console.log(`Correct Answer: ${correctAnswer}. Answers: ${JSON.stringify(answers)}`);
 
         const unifyString = str => str ? str.toLowerCase().replace(/[ -_]/g, '') : undefined;
 

@@ -14,6 +14,7 @@ import {OptOutComponent} from "./components/OptOutComponent";
  */
 
 const settings = getSettings();
+export const MAX_ROUNDS = 6;
 
 export default class ShadeGamePlugin extends BasePlugin {
 
@@ -36,18 +37,7 @@ export default class ShadeGamePlugin extends BasePlugin {
             name: 'Shade Game Component',
             description: 'Initiates the shading game',
             settings: [
-                {
-                    id: 'picture',
-                    name: 'Picture',
-                    type: 'file',
-                    help: 'Picture that the users should guess. Leave blank for the default.'
-                },
-                {
-                    id: 'correct-answer',
-                    name: 'Superhero',
-                    type: 'text',
-                    help: 'The superhero that is depicted in the picture'
-                },
+                ...(this.generateAnswerPairs()),
                 {id: 'action-start-game', name: 'Start game', type: 'button'},
                 {id: 'action-start-round', name: 'Start round', type: 'button'},
                 {id: 'action-stop-round', name: 'Stop round', type: 'button'},
@@ -69,6 +59,25 @@ export default class ShadeGamePlugin extends BasePlugin {
         });
 
         await this.initialLoad();
+    }
+
+    generateAnswerPairs() {
+        const answerPairs = [];
+        for (let i = 1; i <= MAX_ROUNDS; i++) {
+            answerPairs.push({
+                id: `picture${i}`,
+                name: `Picture ${i}`,
+                type: 'text',
+                help: 'Picture that the users should guess. Leave blank for skipping this round.'
+            });
+            answerPairs.push({
+                id: `correct-answer${i}`,
+                name: `Correct Answer ${i}`,
+                type: 'text',
+                help: 'The superhero that is depicted in the picture'
+            });
+        }
+        return answerPairs;
     }
 
     async initialLoad() {
