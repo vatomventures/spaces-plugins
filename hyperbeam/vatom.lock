@@ -1,0 +1,14 @@
+{
+  "id": "hyperbeam",
+  "name": "Hyberbeam",
+  "version": "0.0.2",
+  "beta": true,
+  "description": "Show embedded browser",
+  "longDescription": "Show embedded browser",
+  "configuration": "N/A",
+  "category": "Developer Tools",
+  "businessId": "PDTw9Kzk8K",
+  "price": 0,
+  "releaseNotes": "Publish",
+  "entrypoint": "https://plugins.vatominc.cool/PDTw9Kzk8K/65068db725d97bbc6634ebccd50b925d/plugin.js"
+}
