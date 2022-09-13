@@ -26,7 +26,6 @@ export default class ShadeGamePlugin extends BasePlugin {
     answers = {};
     gameId;
     gameMasterId;
-    pictureId = settings.pictureId;
 
     /** Called on load */
     async onLoad() {
@@ -81,6 +80,16 @@ export default class ShadeGamePlugin extends BasePlugin {
     }
 
     async initialLoad() {
+
+        await this.menus.register({
+            section: 'plugin-settings',
+            panel: {
+                fields: [
+                    { id: 'imageScreenId', name: 'Picture Id', help: 'Enter the id of the image object where the pictures will be shown', type: 'text' }
+                ]
+            }
+        });
+
         await this.objects.update(this.pictureId, {url: this.paths.absolute('gameToStart.png')}, false);
 
         const instanceId = await this.world.getInstanceID();

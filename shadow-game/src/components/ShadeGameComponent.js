@@ -36,6 +36,12 @@ export class ShadeGameComponent extends BaseComponent {
             this.plugin.menus.alert(null, 'There is already an active game');
             return;
         }
+        const imageScreenId = await this.plugin.getField('imageScreenId');
+        if (!imageScreenId) {
+            this.plugin.menus.alert(null, 'There is no Image Object Id in setting for showing the images');
+            return;
+        }
+        this.plugin.pictureId = imageScreenId;
         const instanceId = await this.plugin.world.getInstanceID();
         await fetch(`${settings.host}/new-game`, {
             method: 'POST',
