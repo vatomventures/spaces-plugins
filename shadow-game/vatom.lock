@@ -1,7 +1,7 @@
 {
   "id": "shadegameplugin",
   "name": "Shade Game",
-  "version": "0.0.77",
+  "version": "0.0.78",
   "beta": true,
   "description": "Find the superhero in the shade",
   "longDescription": "Click on the appropriate place to register in the game. Once the game start a picture of a superhero shade will appear, and you have to type their name in the text box. Succeed and win points.",
@@ -9,6 +9,6 @@
   "category": "Fun",
   "businessId": "PDTw9Kzk8K",
   "price": 0,
-  "releaseNotes": " ",
-  "entrypoint": "https://plugins.vatominc.cool/PDTw9Kzk8K/da6e8f204b2893a87ee2c33a20ae36e6/plugin.js"
+  "releaseNotes": "Settings",
+  "entrypoint": "https://plugins.vatominc.cool/PDTw9Kzk8K/f4afa00921231a84ff47ae5d8964dc74/plugin.js"
 }

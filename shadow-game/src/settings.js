@@ -3,7 +3,8 @@ export const settingsProd = {
 };
 
 export const settingsDev = {
-    host: 'https://1b5aypw1o3.execute-api.us-west-1.amazonaws.com/dev'
+    host: 'https://1b5aypw1o3.execute-api.us-west-1.amazonaws.com/dev',
+    pictureId: 'object:shadegameplugin:qtexk4nriho'
 };
 
 export const settingsLocal = {
@@ -11,4 +12,4 @@ export const settingsLocal = {
     pictureId: 'object:shadegameplugin:qtexk4nriho'
 };
 
-export const getSettings = () => settingsLocal;
+export const getSettings = () => settingsDev;
