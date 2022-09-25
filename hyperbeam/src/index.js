@@ -7,6 +7,8 @@
  * @license MIT
  * @author Vatom Inc.
  */
+import {HyperbeamIFrameComponent} from "./components/HyperbeamIFrameComponent";
+
 export default class MyPlugin extends BasePlugin {
 
     /** Plugin info */
@@ -23,8 +25,13 @@ export default class MyPlugin extends BasePlugin {
             icon: this.paths.absolute('button-icon.png'),
             text: 'Hyperbeam',
             action: () => this.onButtonPress()
-        })
+        });
 
+        this.objects.registerComponent(HyperbeamIFrameComponent, {
+            id: 'hyperbeam-iframe-component',
+            name: 'Hyperbeam Session',
+            description: 'To be used with web frame component to keep the hyperbeam session alive',
+        });
     }
 
     /** Called when the user presses the action button */
