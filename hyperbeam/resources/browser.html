@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Input</title>
+</head>
+<body>
+<div id="virtualComputerDiv" style="height:550px;width:1000px"></div>
+
+<script type="module">
+    import Hyperbeam from "https://unpkg.com/@hyperbeam/web@latest/dist/index.js"
+
+    await fetch('https://rf9us6q2ac.execute-api.us-west-1.amazonaws.com/dev')
+        .then(res => res.json())
+        .then(result => result.embedUrl)
+        .then(embedUrl => Hyperbeam(virtualComputerDiv, embedUrl));
+
+</script>
+</body>
+</html>
