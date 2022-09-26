@@ -1,5 +1,5 @@
 import {getSettings} from "../settings";
-import {MAX_ROUNDS} from "../index";
+import {MAX_ROUNDS, MAXCOUNTDOWNSECONDS} from "../index";
 
 const levenshtein = require("js-levenshtein");
 
@@ -71,6 +71,32 @@ export class ShadeGameComponent extends BaseComponent {
             this.numberOfRounds++;
         }
         this.plugin.messages.send({action: 'msg-start-game', gameId: this.plugin.gameId, gameMasterId}, true);
+
+        const countdownId = await this.plugin.getField("countdownId");
+        if (!countdownId) {
+          this.plugin.menus.alert(
+            null,
+            "There is no Countdown Object Id in setting for showing the countdown timer"
+          );
+          return;
+        }
+        this.plugin.countdownId = countdownId;
+
+        const updateCountDown = async (data) => {
+          await this.plugin.objects.update(this.plugin.countdownId, data);
+        };
+    
+        var count = MAXCOUNTDOWNSECONDS;
+        async function anim() {
+          if (count > 0) {
+            updateCountDown({ textValue: count });
+            count--;
+            setTimeout(anim, 1000);
+          } else {
+            updateCountDown({ textValue: "" });
+          }
+        }
+        anim();
     }
 
     async endGame() {

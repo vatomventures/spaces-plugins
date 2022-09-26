@@ -15,6 +15,7 @@ import {OptOutComponent} from "./components/OptOutComponent";
 
 const settings = getSettings();
 export const MAX_ROUNDS = 6;
+export const MAXCOUNTDOWNSECONDS = 3;
 
 export default class ShadeGamePlugin extends BasePlugin {
 
@@ -85,7 +86,8 @@ export default class ShadeGamePlugin extends BasePlugin {
             section: 'plugin-settings',
             panel: {
                 fields: [
-                    { id: 'imageScreenId', name: 'Picture Id', help: 'Enter the id of the image object where the pictures will be shown', type: 'text' }
+                    { id: 'imageScreenId', name: 'Picture Id', help: 'Enter the id of the image object where the pictures will be shown', type: 'text' },
+                    { id: 'countdownId', name: 'Countdown Id', help: 'Enter the id of the countdown object where the countdown timer will be shown', type: 'text' }
                 ]
             }
         });
