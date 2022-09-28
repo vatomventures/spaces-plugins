@@ -1,14 +1,14 @@
 {
   "id": "hyperbeam",
   "name": "Hyberbeam",
-  "version": "0.0.4",
+  "version": "0.1.1",
   "beta": true,
   "description": "Show embedded browser",
   "longDescription": "Show embedded browser",
   "configuration": "N/A",
   "category": "Developer Tools",
-  "businessId": "PDTw9Kzk8K",
+  "businessId": "QN4vyS5zGU",
   "price": 0,
-  "releaseNotes": "Create Hyperbeam iframe Component",
-  "entrypoint": "https://plugins.vatominc.cool/PDTw9Kzk8K/8681ca64e25dfd06915b072e27d71c21/plugin.js"
+  "releaseNotes": "Add icon",
+  "entrypoint": "https://plugins.vatom.com/QN4vyS5zGU/c74845f53119634284def696bef72a94/plugin.js"
 }
