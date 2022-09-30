@@ -9,6 +9,7 @@
  */
 import {VoteTextComponent} from "./components/VoteTextComponent";
 import {getSettings} from "./settings";
+import {VoteTopVotesComponent} from "./components/VoteTopVotesComponent";
 
 const settings = getSettings();
 
@@ -26,6 +27,12 @@ export default class VotePlugin extends BasePlugin {
             id: 'vote-text-component',
             name: 'Increase Vote',
             description: 'Attach voting capabilities to text object',
+        });
+
+        await this.objects.registerComponent(VoteTopVotesComponent, {
+            id: 'vote-top-votes-component',
+            name: 'Top Votes',
+            description: 'Show Top Votes in a Text Area',
         });
 
         await this.menus.register({

@@ -10,4 +10,4 @@ export const settingsLocal = {
     host: 'http://localhost:3000/local',
 };
 
-export const getSettings = () => settingsDev;
+export const getSettings = () => settingsLocal;
