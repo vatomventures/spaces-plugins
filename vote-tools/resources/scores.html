@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Scores</title>
+</head>
+<body>
+<div class="scoreboard" style="color:green">
+</div>
+
+<!-- Code -->
+<script>
+    const generateTable = (votes) => {
+        const scoreDiv = document.querySelector("div.scoreboard");
+
+        while (scoreDiv.firstChild) {
+            scoreDiv.removeChild(scoreDiv.firstChild) // Remove all children from scoreboard div (if any)
+        }
+
+        const table = document.createElement('table');
+        for (const vote of votes) {
+            const tr = document.createElement('tr');
+
+            const value = document.createElement('td');
+            const count = document.createElement('td');
+
+            const valueTxt = document.createTextNode(vote.value);
+            const countTxt = document.createTextNode(vote.count);
+
+            value.appendChild(valueTxt);
+            count.appendChild(countTxt);
+            tr.appendChild(value);
+            tr.appendChild(count);
+
+            table.appendChild(tr);
+        }
+        scoreDiv.appendChild(table);
+    };
+
+    // Called when a message is received from the plugin
+    window.addEventListener('message', e => {
+        switch (e.data.action) {
+            case 'generate-table':
+                generateTable(e.data.votes);
+                break;
+        }
+    });
+</script>
+</body>
+</html>

@@ -37,7 +37,6 @@ export class VoteTextComponent extends BaseComponent {
         const count = await fetch(`${settings.host}/vote/${instanceId}/${this.fields.name}`)
             .then(resp => resp.json())
             .then(json => json.count);
-        console.log(count);
         const text = this.fields.textValue.substring(0, this.fields.textValue.lastIndexOf('('));
         const textValue = `${text}(${count})`;
         await this.plugin.objects.update(this.objectID, {textValue});

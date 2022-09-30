@@ -1,5 +1,5 @@
 {
-  "name": "vote-game",
+  "name": "vote-tools",
   "version": "1.0.0",
   "description": "A plugin for Vatom Spaces.",
   "main": "src/index.js",
