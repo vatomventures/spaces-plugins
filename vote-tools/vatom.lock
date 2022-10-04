@@ -1,7 +1,7 @@
 {
   "id": "vote-tools",
   "name": "Vote Tools",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "beta": true,
   "description": "Voting Tools",
   "longDescription": "Tools that will help creating vote mechanics in Games",
@@ -9,6 +9,6 @@
   "category": "Fun",
   "businessId": "PDTw9Kzk8K",
   "price": 0,
-  "releaseNotes": "Initial Release",
-  "entrypoint": "https://plugins.vatominc.cool/PDTw9Kzk8K/a47e06b9e59850575e3e3a1280dd6503/plugin.js"
+  "releaseNotes": "Fix undefined",
+  "entrypoint": "https://plugins.vatominc.cool/PDTw9Kzk8K/7df8780f9cf4410731f8ec66c1139069/plugin.js"
 }

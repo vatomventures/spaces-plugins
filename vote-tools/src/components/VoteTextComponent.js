@@ -28,7 +28,7 @@ export class VoteTextComponent extends BaseComponent {
     }
 
     async updateTextValue(instanceId) {
-        const regex = new RegExp('^.*\\(\\d*\\)$');
+        const regex = new RegExp('^.*\\(\\d*.|undefined\\)$');
         // textValue need to be in 'value (total_votes)' format in order to update it.
         if (!regex.test(this.fields.textValue)) {
             return;
