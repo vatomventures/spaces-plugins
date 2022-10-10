@@ -28,20 +28,13 @@ export default class VotePlugin extends BasePlugin {
             description: 'Attach voting capabilities to text object',
         });
 
-        await this.menus.register({
-            section: 'plugin-settings',
-            panel: {
-                fields: [
-                    { id: 'topVotesPlaneId', name: 'Plane Id', help: 'Enter the id of the plane object where the top scores will be shown', type: 'text' }
-                ]
-            }
-        });
-
-        this.menus.register({
-            icon: this.paths.absolute('button-icon.png'),
-            text: 'Top Scores',
-            action: () => this.topScores()
-        })
+        if (await this.user.isAdmin()) {
+            this.menus.register({
+                icon: this.paths.absolute('button-icon.png'),
+                text: 'Top Scores',
+                action: () => this.topScores()
+            });
+        }
     }
 
     async registerScoresOverlay() {
@@ -76,6 +69,10 @@ export default class VotePlugin extends BasePlugin {
         console.log(`onMessage plugin received: ${JSON.stringify(data)}`);
         switch (data.action) {
             case 'msg-panel-load':
+                await this.menus.postMessage({action: 'generate-table', votes: data.votes});
+                break;
+            case 'msg-new-vote':
+                await this.objects.update(data.textId, {textValue: data.textValue});
                 await this.menus.postMessage({action: 'generate-table', votes: data.votes});
                 break;
         }
