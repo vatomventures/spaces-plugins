@@ -39,6 +39,6 @@ export class VoteTextComponent extends BaseComponent {
             .then(json => json.count);
         const text = this.fields.textValue.substring(0, this.fields.textValue.lastIndexOf('('));
         const textValue = `${text}(${count})`;
-        await this.plugin.objects.update(this.objectID, {textValue});
+        await this.plugin.messages.send({action: 'msg-new-vote', textId: this.objectID, textValue}, true);
     }
 }
