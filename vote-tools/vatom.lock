@@ -1,7 +1,7 @@
 {
   "id": "vote-tools",
   "name": "Vote Tools",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "beta": true,
   "description": "Voting Tools",
   "longDescription": "Tools that will help creating vote mechanics in Games",
@@ -9,6 +9,6 @@
   "category": "Fun",
   "businessId": "PDTw9Kzk8K",
   "price": 0,
-  "releaseNotes": "Fix update text value from other users",
-  "entrypoint": "https://plugins.vatominc.cool/PDTw9Kzk8K/0beecd167cd6f5861c5ca453d7781b44/plugin.js"
+  "releaseNotes": "Added Pop up messages, Time now resets 12am PT",
+  "entrypoint": "https://plugins.vatominc.cool/PDTw9Kzk8K/d4191ad6d9f7027e47cda8bdf330a428/plugin.js"
 }
